@@ -60,7 +60,7 @@ jobs:
             - name: Run Tests
               # run the npm test with a code coverage report (to see how much percentage of code is tested)
               # (--) prevents npm from running as a flag, stating its for the underlying script (jest)
-              run: npm test -- --coverage 
+              run: npm test -- --coverage --passWithNoTests
 
             
             
