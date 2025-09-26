@@ -9,11 +9,11 @@ on:
     # 'push' - specific event that runs workflow when 'push' is triggerd
     push:
         # we can use 'branches'/'ignore-branches' to filter out tiggers on specific branch
-        branches: ["main"]
+        branches: ["master"]
     # 'pull_request' - specific event that runs workflow when 'pull_request' is triggerd
     pull_request:
         # we can use 'branches'/'ignore-branches' to filter out tiggers on specific branch
-        branches: ["main"]
+        branches: ["master"]
 
 # 'job' - is a set of instructs which tell a machine to perform tasks
 # every 'job' - runs a fresh virutal-machine called 'runner'
