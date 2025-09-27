@@ -1,0 +1,69 @@
+# .github/workflows/ci.yml
+
+#name of the workflow, will be shown on github actions
+name: Node.js CI (continuous integration)
+
+# defining when should a workflow run
+    # the keyword 'on' to configure the trigger/specific events to run the workflow 
+on:
+    # 'push' - specific event that runs workflow when 'push' is triggerd
+    push:
+        # we can use 'branches'/'ignore-branches' to filter out tiggers on specific branch
+        branches: ["master"]
+    # 'pull_request' - specific event that runs workflow when 'pull_request' is triggerd
+    pull_request:
+        # we can use 'branches'/'ignore-branches' to filter out tiggers on specific branch
+        branches: ["master"]
+
+# 'job' - is a set of instructs which tell a machine to perform tasks
+# every 'job' - runs a fresh virutal-machine called 'runner'
+
+# jobs - which defines all the jobs in this workflow
+jobs: 
+    # unique id for a job 'build-and-test'
+    build-and-test:
+        # name of job : Build and Test
+        name: Build and Test
+        # OS to run the job on
+        runs-on: ubuntu-latest
+
+        # ***BEST PRACTICE***
+        # github actions feature, run tests on different version of node to check its compatabilty
+        # runs this job multiple times in parallel, with node version defined in node-version array 
+        strategy:
+            matrix:
+                node-version: [18.x, 20.x]
+
+        # list of steps to execute on the fresh virtual matchine for this job
+        # steps can either be:
+            # 'run' (which runs on the shell of virutal machine)
+            # 'uses' (which use pre-defined github actions)
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            # name of the step to display
+            - name: Setup Node.js ${{ matrix.node-version }}
+              # using the exising github actions to install install node
+              uses: actions/setup-node@v4
+              # 'with' - keyword is used to pass params to steps
+              with:
+                # 'node-version' : passing node version param
+                node-version: ${{ matrix.node-version }}
+                # 'cache' : we want to use existing .node-moudles file unless package.lock.json is changed
+                cache: npm 
+
+            - name: Install dependencies
+              #install npm clean-install with strict versions defined in the package.json file
+              run: npm ci 
+            
+            - name: Run Tests
+              # run the npm test with a code coverage report (to see how much percentage of code is tested)
+              # (--) prevents npm from running as a flag, stating its for the underlying script (jest)
+              run: npm test -- --coverage --passWithNoTests
+
+            
+            
+
+        
+
