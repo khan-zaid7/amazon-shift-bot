@@ -4,8 +4,9 @@ const todoService = require('../services/todoService');
 // @desc Get all todos
 // @route GET /api/v1/todos
 // @access PUBLIC 
-const getTodos = (req, res, next) => {
-    res.status(200).json([]);
+const getTodos = async (req, res, next) => {
+    const todos = await todoService.getAllTodos();
+    res.status(200).json(todos);
 }
 
 // @desc Get a single todo by ID

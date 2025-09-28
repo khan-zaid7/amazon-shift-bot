@@ -2,7 +2,6 @@
 
 const express = require('express')
 const todoRoutes = require('./api/v1/routes/todoRoutes');
-const Todo = require('./api/v1/models/Todo');
 
 // create an instance of express application
 const app = express();

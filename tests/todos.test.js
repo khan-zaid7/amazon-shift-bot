@@ -10,6 +10,10 @@ jest.mock("../src/api/v1/services/todoService")
 describe('GET /api/v1/todos', () => {
     //an individual test case, behavior of test, description should be readable
     it('should response with an array of toods', async () => {
+        todoService.getAllTodos.mockResolvedValue([
+            { id: 1, task: "Run a 5k", completed: false },
+            { id: 2, task: "Go to the gym", completed: true }
+        ]);
         // the request to app
         //request object takes the app (express application)
         const response = await request(app)
