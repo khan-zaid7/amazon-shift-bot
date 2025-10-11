@@ -4,11 +4,18 @@ const createTodoRepository = (db) => {
     return {
         // cerate a new todo 
         async create(data) {
-            console.log(data)
-            const [todo] = await db('todos')
-                .returning(['id', 'task', 'completed'])
-                .insert({ task: data.task, completed: data.completed });
-            return normalizeTodo(todo);
+            try {
+                const [todo] = await db('todos')
+                    .returning(['id', 'task', 'completed'])
+                    .insert({ task: data.task, completed: data.completed });
+                return normalizeTodo(todo);
+            }
+            catch (error) {
+                if (error.code === 'SQLITE_CONSTRAINT') {
+                    throw new Error("Duplicate todo detected.");
+                }
+                throw error;
+            }
         },
 
         // create many new todos at once
@@ -24,7 +31,7 @@ const createTodoRepository = (db) => {
                 .where({ id })
                 .select('id', 'task', 'completed')
                 .first();
-            return todo ? normalizeTodo(todo) : undefined;
+            return todo ? normalizeTodo(todo) : null;
         },
 
         async findAll() {
@@ -46,7 +53,12 @@ const createTodoRepository = (db) => {
         async remove(id) {
             return await db('todos')
                 .where({ id })
-                .del();
+                .del() == 1 ? true : false;
+        },
+        async findByTask(task){
+            return db('todos')
+                .where({task})
+                .first();
         }
     }
 }

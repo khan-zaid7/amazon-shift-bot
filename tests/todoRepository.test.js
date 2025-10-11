@@ -39,7 +39,15 @@ describe("TodoRepository", () => {
             const returnedData = await todoRepository.create(data);
 
             expect(returnedData).toEqual(expect.objectContaining(expectedData));
+        })
 
+        it("should throw an error when creating duplicate todo", async () => {
+            const data = { task: "Creating a todo", completed: false };
+            const expectedData = {id: 1, task: "Creating a todo", completed: false };
+
+            const returnedData = await todoRepository.create(data);
+
+            await expect(todoRepository.create(data)).rejects.toThrow("Duplicate todo detected");
         })
     });
 
@@ -56,12 +64,12 @@ describe("TodoRepository", () => {
             expect(returnedData).toEqual(expectedData);
         })
 
-        it("should be return undefined if no todo was found with sepecified id", async () => {
+        it("should be return null if no todo was found with sepecified id", async () => {
             const id = 1;
 
             const returnedData = await todoRepository.findById(id);
 
-            expect(returnedData).toEqual(undefined);
+            expect(returnedData).toEqual(null);
         })
     });
 
@@ -112,7 +120,7 @@ describe("TodoRepository", () => {
         it("should be able to delete an exisitng todo", async () => {
             const id = 1;
             const beforeDelete = {id: 1, task: "Delete this todo.", completed: false};
-            const afterDelete = undefined;
+            const afterDelete = null;
 
             const newTodo = await todoRepository.create({task: "Delete this todo.", completed: false});
             await todoRepository.remove(id);
