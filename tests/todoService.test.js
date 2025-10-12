@@ -31,7 +31,7 @@ describe("Todo Service", () => {
             // Act
             const requestData = { task: "Create a new todo", completed: false };
             const expectedData = { id: 1, ...requestData };
-            const expectedResult = new ServiceResult({ "code": ResultCode.SUCCESS, "data": expectedData, "message": "Todo Created.", "success": true });
+            const expectedResult = new ServiceResult({ "code": ResultCode.CREATED, "data": expectedData, "message": "Todo Created.", "success": true });
 
 
             mockTodoRepository.create.mockResolvedValue(expectedData);
@@ -202,7 +202,7 @@ describe("Todo Service", () => {
             const id = 1;
             mockTodoRepository.findById.mockResolvedValue({ id: 1, task: "remove this todo", completed: false });
             mockTodoRepository.remove.mockResolvedValue(true);
-            const expectedData = new ServiceResult({ success: true, code: ResultCode.SUCCESS, message: "Todo deleted." });
+            const expectedData = new ServiceResult({ success: true, code: ResultCode.NO_CONTENT, message: "Todo deleted." });
 
             const isDeleted = await todoService.removeTodo(id);
 

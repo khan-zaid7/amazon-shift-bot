@@ -1,14 +1,7 @@
 // src/api/v1/services/todoService
 const ServiceResult = require('../utils/serviceResult');
+const ResultCode = require('../utils/resultCode');
 
-const ResultCode = {
-    NOT_FOUND: 'NOT_FOUND',
-    DUPLICATE_ENTRY: 'DUPLICATE_ENTRY',
-    VALIDATION_ERROR: 'VALIDATION_ERROR',
-    SUCCESS: 'SUCCESS',
-    DEFAULT: 'DEFAULT',
-    INTERNAL_ERROR: 'INTERNAL_ERROR'
-};
 
 const createTodoService = (todoRepository) => {
     return {
@@ -22,7 +15,7 @@ const createTodoService = (todoRepository) => {
                 }
 
                 const todo = await todoRepository.create({ task, completed });
-                return new ServiceResult({ success: true, data: todo, code: ResultCode.SUCCESS, message: "Todo Created." });
+                return new ServiceResult({ success: true, data: todo, code: ResultCode.CREATED, message: "Todo Created." });
             }
             catch (error) {
                 // Log the real error for debugging purposes
@@ -113,7 +106,7 @@ const createTodoService = (todoRepository) => {
                     return new ServiceResult({ success: false, code: ResultCode.NOT_FOUND, message: "Todo not found." });
                 }
                 const deleted = await todoRepository.remove(id);
-                return new ServiceResult({ success: true, code: ResultCode.SUCCESS, message: "Todo deleted." });
+                return new ServiceResult({ success: true, code: ResultCode.NO_CONTENT, message: "Todo deleted." });
             }
             catch (error) {
                 // Log the real error for debugging purposes

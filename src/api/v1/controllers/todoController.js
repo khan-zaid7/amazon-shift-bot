@@ -1,105 +1,48 @@
-// src/api/v1/controllers/todoController
-const todoService = require('../services/todoService');
+const statusCode = require('../utils/responseMapping');
+const resolveResponse = require('../utils/resolveResponse');
 
-// @desc Get all todos
-// @route GET /api/v1/todos
-// @access PUBLIC 
-const getTodos = async (req, res, next) => {
-    const todos = await todoService.getAllTodos();
-    res.status(200).json(todos);
-}
+const createTodoController = (todoService) => {
+    return {
+        async getTodos(req, res, next) {
+            const result = await todoService.findAllTodos();
 
-// @desc Get a single todo by ID
-// @route GET /api/v1/todos/id
-// @access PUBLIC
-const getTodoById = async (req, res, next) => {
-    const id = parseInt(req.params.id, 10);
-    let todo = await todoService.findTodoById(id);
+            if ((result.success === true) && Array.isArray(result.data) && (result.code === 'SUCCESS')) {
+                return res.status(statusCode[result.code]).json(result.data);
+            }
 
+            return resolveResponse(result, res);
+        },
+        async getTodo(req, res, next) {
+            const id = parseInt(req.params.id, 10);
+            const result = await todoService.findTodoById(id);
+            return resolveResponse(result, res);
 
-    if (!todo) {
-        return res.status(404).json({ message: `Todo with id ${id} not found` });
-    }
+        },
+        async createTodo(req, res, next) {
+            const requestData = req.body;
+            const result = await todoService.createTodo(requestData);
+            return resolveResponse(result, res);
+        },
+        async updateTodo(req, res, next) {
+            const id = parseInt(req.params.id, 10);
+            const requestData = req.body;
 
-    return res.status(200).json(todo);
-}
+            const result = await todoService.updateTodo(id, requestData);
+            return resolveResponse(result, res);
+        },
+        async removeTodo(req, res, next) {
+            const id = parseInt(req.params.id, 10);
+            const result = await todoService.removeTodo(id);
 
-// @desc Post a new Todo
-// @route POST /api/v1/todos
-// @access PUBLIC
-const createTodo = async (req, res, next) => {
-
-    const { id, task, completed } = req.body;
-
-
-    const existingTodo = await todoService.findTodoById(id);
-    if (existingTodo) return res.status(409).json({ message: `Todo with id ${id} already exists.` });
-
-
-    const newTodoData = { id, task, completed };
-    let newTodo = await todoService.addTodo(newTodoData);
-
-    return res.status(201).json(newTodo);
-}
-
-
-// @desc Update an exisiting Todo
-// @route PATCH /api/v1/todos
-// @access PUBLIC
-const updateTodo = async (req, res, next) => {
-
-    const id = parseInt(req.params.id, 10);
-
-    const existingTodo = await todoService.findTodoById(id);
-    if (!existingTodo) { 
-        return res.status(404).json({ message: `Todo with id ${id} not found.` });
-    };
-
-    // build an object with only the fields persent in the request body
-    // This is secure and correctly handles partical updates 
-    const updateData = {};
-    
-    // list of all the field which can be updated
-    const allowedUpdates = ['task', 'completed'];
-
-    allowedUpdates.forEach(field => {
-        if (req.body[field] !== undefined){
-            updateData[field] = req.body[field];
+            if ((result.success === true) && (result.code === 'SUCCESS')) {
+                return res.status(statusCode[result.code]).json({ message: result.message });
+            }
+            
+            return resolveResponse(result, res);
         }
-    });
-    
-    //return an error if no valid fields found in the request body
-    if (Object.keys(updateData).length === 0){
-        return res.status(400).json({message: 'No valid fields provided for update.'});
-    }
 
-    const updatedTodo = await todoService.updateTodo(existingTodo.id, updateData);
-
-    res.status(200).json(updatedTodo);
-};
-
-
-// @desc Delete a Todo
-// @route DELETE /api/v1/todos
-// @access PUBLIC
-const deleteTodo = async (req, res, next) => {
-    const id = parseInt(req.params.id, 10);
-
-    const existingTodo = await todoService.findTodoById(id);
-    if (!existingTodo) {
-        return res.status(404).json({message: `Todo with id ${id} does not exist.`})
-    }
-
-    await todoService.deleteTodo(existingTodo.id);
-    
-    res.status(204).send();
+    };
 }
 
 
-module.exports = {
-    getTodos,
-    getTodoById,
-    createTodo,
-    updateTodo,
-    deleteTodo
-};
+module.exports = createTodoController;
