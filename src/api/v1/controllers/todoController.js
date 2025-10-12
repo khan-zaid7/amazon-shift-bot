@@ -5,11 +5,6 @@ const createTodoController = (todoService) => {
     return {
         async getTodos(req, res, next) {
             const result = await todoService.findAllTodos();
-
-            if ((result.success === true) && Array.isArray(result.data) && (result.code === 'SUCCESS')) {
-                return res.status(statusCode[result.code]).json(result.data);
-            }
-
             return resolveResponse(result, res);
         },
         async getTodo(req, res, next) {
@@ -33,11 +28,6 @@ const createTodoController = (todoService) => {
         async removeTodo(req, res, next) {
             const id = parseInt(req.params.id, 10);
             const result = await todoService.removeTodo(id);
-
-            if ((result.success === true) && (result.code === 'SUCCESS')) {
-                return res.status(statusCode[result.code]).json({ message: result.message });
-            }
-            
             return resolveResponse(result, res);
         }
 

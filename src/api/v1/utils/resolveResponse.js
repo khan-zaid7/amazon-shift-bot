@@ -1,27 +1,28 @@
 const statusCode = require('../utils/responseMapping');
 
 const resolveResponse = (result, res) => {
-    if ((result.success === true) && (result.data) && (result.code === 'SUCCESS')) {
-        return res.status(statusCode[result.code]).json(result.data);
+
+    if (!result || !result.code || !statusCode[result.code]) {
+        return res.status(500).json({ message: 'Invalid respnose structure.' });
     }
-    if ((result.success === true) && (result.data) && (result.code === 'CREATED')) {
-        return res.status(statusCode[result.code]).json(result.data);
+
+    const { success, code, data, message } = result;
+    try {
+        if (success) {
+            // sending no content for 204 
+            if (code === 'NO_CONTENT') {
+                return res.status(statusCode[code]).send();
+            }
+            return res.status(statusCode[code]).json(data ?? {});
+        }
+        return res.status(statusCode[code]).json({ message: message ?? 'An error occured' });
     }
-    if ((result.success === true) && (result.code === 'NO_CONTENT')) {
-        return res.status(statusCode[result.code]).json();
-    }
-    if ((result.success === false) && (result.code === 'DUPLICATE_ENTRY')) {
-        return res.status(statusCode[result.code]).json({ message: result.message });
-    }
-    if ((result.success === false) && (result.code === 'NOT_FOUND')) {
-        return res.status(statusCode[result.code]).json({ message: result.message });
-    }
-    if ((result.success === false) && (result.code === 'VALIDATION_ERROR')) {
-        return res.status(statusCode[result.code]).json({ message: result.message });
-    }
-    if ((result.success === false) && (result.code === 'INTERNAL_ERROR' || result.code === 'DEFAULT')) {
-        return res.status(statusCode[result.code]).json({ message: result.message });
+    catch (err) {
+        console.error('Error in resolveResponse:', err);
+        return res.status(500).json({ message: 'Internal response resolution failure.' });
     }
 }
+
+
 
 module.exports = resolveResponse;
