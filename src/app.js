@@ -1,28 +1,20 @@
-//src/app.js
+// src/app.js
 
-const express = require('express')
-const dbConfig = require('./config/database');
-const createTodoRepository = require('./api/v1/repositories/todoRepository');
-const {createTodoService} = require('./api/v1/services/todoService');
-const createTodoRouter = require('./api/v1/routes/todoRoutes');
-const knex = require('knex');
+const express = require('express');
+const todoRoutes = require('./api/v1/routes/todoRoutes');
 
-// create an instance of express application
-const app = express();
+// This is now a FACTORY function. It ACCEPTS the service it needs.
+const createApp = (todoService) => {
+    const app = express();
+    app.use(express.json());
 
-// enable express to receive json
-app.use(express.json());
+    // It uses the provided service to wire up the routes.
+    app.use('/api/v1/todos', todoRoutes(todoService));
 
-// create the db connection 
-const db = knex(dbConfig.development)
+    // It returns the fully configured app instance.
+    return app;
+};
 
-// create the repository instance
-const todoRepository = createTodoRepository(db);
+module.exports = createApp;
 
-// create the todo service instance 
-const todoService = createTodoService(todoRepository);
 
-app.use('/api/v1/todos', createTodoRouter(todoService));
-
-// export the app so tha`t tests can use it 
-module.exports = app;

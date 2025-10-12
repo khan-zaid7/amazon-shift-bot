@@ -4,7 +4,6 @@ const {body, param, validationResult} = require('express-validator');
 const todoValidationRules = () => {
     return [
         // id must exist and be an integer
-        body('id').notEmpty().withMessage("The 'id' field is required.").isInt().withMessage("The 'id' field must be an integer."),
         body('task').notEmpty().withMessage("The 'task' field is required.").isString().withMessage("The 'task' field must be a string."),
         body('completed').notEmpty().withMessage("The 'completed' field is required.").isBoolean().withMessage("The 'completed' field must be an boolean.")
     ];
