@@ -58,8 +58,6 @@ jobs:
         # dependencies and conditions on this job
         # making sure that the tests job ran with 100% success.
         needs: test
-        # making sure that this build runs only on merge/push on master branch never on pull_requests
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
         # grant permission for job to write to the 
         # we are giving this job write package permissions
@@ -73,14 +71,22 @@ jobs:
           # copy the code to the runner instance using checkout actions
           - name: Checkout repository
             uses: actions/checkout@v4
+
+          # Check if its a push to main branch
+          - name: Check if running on master branch
+            id: check_main
+            if: github.ref != 'refs/heads/master' || github.event_name != 'push'
+            run: echo "Skipping build and push for non-master branch" 
           
           # Setup actions to install advanced docker builder enginer 
           - name: Setup docker buildx
+            if: success() && steps.check_main.conclusion == 'skipped'
             uses: docker/setup-buildx-action@v3
           
           
           # this action handles the login to the container registery
           - name: Login to github container registery
+            if: success() && steps.check_main.conclusion == 'skipped'
             uses: docker/login-action@v3
             with: 
                 # specifies that we are logining into github container registery
@@ -95,6 +101,7 @@ jobs:
               # - If you push a git tag like (version 1.1.0), it will create a docker tag called `1.1.0`
               # - This saves us from manually configuring tags
           - name: Extract metadata (Tags, Labels) for Docker 
+            if: success() && steps.check_main.conclusion == 'skipped'
             id: meta
             uses: docker/metadata-action@v5
             # it tells the actions the name of the image we want to create, using format `gchr.io/your-username/your-repo-name`.
@@ -103,6 +110,7 @@ jobs:
             
           # This is the main event. It combines the docker build and docker push commands into one step. 
           - name: Build and push docker image 
+            if: success() && steps.check_main.conclusion == 'skipped'
             uses: docker/build-push-action@v5
             with: 
               # Look for the Dockerfile in the current directory
