@@ -98,7 +98,8 @@ jobs:
             id: meta
             uses: docker/metadata-action@v5
             # it tells the actions the name of the image we want to create, using format `gchr.io/your-username/your-repo-name`.
-            with: ghcr.io/${{github.repository}}
+            with: 
+              images: ghcr.io/${{github.repository}}
             
           # This is the main event. It combines the docker build and docker push commands into one step. 
           - name: Build and push docker image 
