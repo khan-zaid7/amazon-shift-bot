@@ -20,101 +20,50 @@ on:
 
 # jobs - which defines all the jobs in this workflow
 jobs: 
-    # Run the tests on every PR and PUSH
-    test:
-      name: Run Tests
-      runs-on: ubuntu-latest
-
-      # ***BEST PRACTICE***
-        # github actions feature, run tests on different version of node to check its compatabilty
-        # runs this job multiple times in parallel, with node version defined in node-version array 
-      strategy:
-        matrix: 
-          node-version: [18.x, 20.x]
-
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
-        
-        - name: Setup Node.js ${{ matrix.node-version }}
-          uses: actions/setup-node@v4
-          with: 
-            node-version: ${{ matrix.node-version }}
-            cache: npm 
-        - name: Install dependencies 
-          run: npm ci
-
-        - name: Run tests 
-          run: npm test -- --coverage --passWithNoTests
-
-      
-    # unique id for a job 'build'
-    build-and-push:
+    # unique id for a job 'build-and-test'
+    build-and-test:
         # name of job : Build and Test
-        name: Build and Push to GHCR
+        name: Build and Test
         # OS to run the job on
         runs-on: ubuntu-latest
 
-        # dependencies and conditions on this job
-        # making sure that the tests job ran with 100% success.
-        needs: test
-        # making sure that this build runs only on merge/push on master branch never on pull_requests
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        # ***BEST PRACTICE***
+        # github actions feature, run tests on different version of node to check its compatabilty
+        # runs this job multiple times in parallel, with node version defined in node-version array 
+        strategy:
+            matrix:
+                node-version: [18.x, 20.x]
 
-        # grant permission for job to write to the 
-        # we are giving this job write package permissions
-        permissions:
-          contents: read
-          packages: write 
-        
-
+        # list of steps to execute on the fresh virtual matchine for this job
+        # steps can either be:
+            # 'run' (which runs on the shell of virutal machine)
+            # 'uses' (which use pre-defined github actions)
         steps:
-          
-          # copy the code to the runner instance using checkout actions
-          - name: Checkout repository
-            uses: actions/checkout@v4
-          
-          # Setup actions to install advanced docker builder enginer 
-          - name: Setup docker buildx
-            uses: docker/setup-buildx-action@v3
-          
-          
-          # this action handles the login to the container registery
-          - name: Login to github container registery
-            uses: docker/login-action@v3
-            with: 
-                # specifies that we are logining into github container registery
-                registry: ghcr.io
-                # A build-in github variable to use the person name who triggerd the action 
-                username: ${{github.actor}}
-                # Securly injects, the personal access token that I added earlier
-                password: ${{secrets.GH_PAT}}
-          
-          # This actions creates smart tags for the Docker image
-              # - For push to the main branch, it will create a tag 'main'
-              # - If you push a git tag like (version 1.1.0), it will create a docker tag called `1.1.0`
-              # - This saves us from manually configuring tags
-          - name: Extract metadata (Tags, Labels) for Docker 
-            id: meta
-            uses: docker/metadata-action@v5
-            # it tells the actions the name of the image we want to create, using format `gchr.io/your-username/your-repo-name`.
-            with: ghcr.io/${{github.repository}}
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            # name of the step to display
+            - name: Setup Node.js ${{ matrix.node-version }}
+              # using the exising github actions to install install node
+              uses: actions/setup-node@v4
+              # 'with' - keyword is used to pass params to steps
+              with:
+                # 'node-version' : passing node version param
+                node-version: ${{ matrix.node-version }}
+                # 'cache' : we want to use existing .node-moudles file unless package.lock.json is changed
+                cache: npm 
+
+            - name: Install dependencies
+              #install npm clean-install with strict versions defined in the package.json file
+              run: npm ci 
             
-          # This is the main event. It combines the docker build and docker push commands into one step. 
-          - name: Build and push docker image 
-            uses: docker/build-push-action@v5
-            with: 
-              # Look for the Dockerfile in the current directory
-              context: . 
-              # Tells the action to push the build to the container registery
-              push: true
-              # uses the smart tags, lables generated by meta step.
-              tags: ${{steps.meta.outputs.tags}}
-              labels: ${{steps.meta.outputs.labels}}
-              # configure docker's build cache to be stored on github actions own infrastructure, spedding future builds 
-              cache-from: type=gha
-              cache-to: type=gha, mode=max```
+            - name: Run Tests
+              # run the npm test with a code coverage report (to see how much percentage of code is tested)
+              # (--) prevents npm from running as a flag, stating its for the underlying script (jest)
+              run: npm test -- --coverage --passWithNoTests
+
+            
+            
 
         
 
-        
