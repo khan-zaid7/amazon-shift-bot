@@ -6,7 +6,7 @@ const path = require("path");
 const development = {
     client: "sqlite3",
     connection: {
-        filename: path.resolve(__dirname, "..", "..", "dev.db3")
+        filename: path.resolve(__dirname, "..", "..", "db", "dev.db3")
     },
     useNullAsDefault: true,
     migrations: {

@@ -4,7 +4,7 @@ const createApp = require('./app'); // Import the new app factory
 
 const dbConfig = require('./config/database');
 const createTodoRepository = require('./api/v1/repositories/todoRepository');
-const createTodoService = require('./api/v1/services/todoService');
+const {createTodoService} = require('./api/v1/services/todoService');
 
 // --- The Real "DI Wiring" ---
 const db = knex(dbConfig.development);

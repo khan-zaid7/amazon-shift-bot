@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "db:migrate": "knex migrate:latest --knexfile knexfile.js --env development"
   },
   "keywords": [],
   "author": "",
