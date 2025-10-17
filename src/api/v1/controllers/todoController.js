@@ -7,6 +7,9 @@ const createTodoController = (todoService) => {
             const result = await todoService.findAllTodos();
             return resolveResponse(result, res);
         },
+        async random(req, res, next) {
+            return res.status(200).json("Yes, CI AND CD Implemented!");
+        },
         async getTodo(req, res, next) {
             const id = parseInt(req.params.id, 10);
             const result = await todoService.findTodoById(id);
