@@ -10,7 +10,7 @@ const createTodoRouter = (todoService) => {
     const router = express.Router();
 
     const todoController = createTodoController(todoService);
-    router.route('/random').get(todoController.random);
+    router.route('/random-new').get(todoController.random);
     router.route('/')
         .get(todoController.getTodos)
         .post(todoValidationRules(), validate, todoController.createTodo);
