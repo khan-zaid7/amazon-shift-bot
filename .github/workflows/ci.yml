@@ -10,6 +10,8 @@ on:
     push:
         # we can use 'branches'/'ignore-branches' to filter out tiggers on specific branch
         branches: ["master"]
+        tags: 
+          - "v*"
     # 'pull_request' - specific event that runs workflow when 'pull_request' is triggerd
     pull_request:
         # we can use 'branches'/'ignore-branches' to filter out tiggers on specific branch
